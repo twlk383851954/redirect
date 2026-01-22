@@ -1,109 +1,31 @@
-name: Update TWLK File Daily
+name: Simple TWLK Updater
 
-于:
+on:
   schedule:
-    # 每天 UTC 时间 15:00 运行 (北京时间 23:00)
-    - cron: '0 15 * * *'
-  workflow_dispatch: # 允许手动触发
-  push:
-    分支:
-      - main
+    - cron: '0 15 * * *'  # UTC 15:00 = 北京时间 23:00
+  workflow_dispatch:
 
 jobs:
-  update-twlk:
+  update:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout repository
+    - name: Checkout repo
       uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-        
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
-        
-    - name: Generate URLs and fetch content
+      
+    - name: Create twlk.txt with date
       run: |
-        # 获取当前日期
-        CURRENT_DATE=$(date -u '+%Y%m%d')
-        CURRENT_YEAR=$(date -u '+%Y')
-        CURRENT_MONTH=$(date -u '+%m')
+        # 获取日期
+        DATE=$(date '+%Y-%m-%d %H:%M:%S')
         
-        # 构建第一个URL
-        URL1="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${CURRENT_DATE}.txt"
-        
-        # 构建第二个URL
-        URL2="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
-        
-        echo "Fetching from: $URL1"
-        echo "Fetching from: $URL2"
-        
-        # 创建临时目录
-        mkdir -p tmp
-        
-        # 下载第一个文件（如果存在）
-        if curl -s --fail "$URL1" > "tmp/file1.txt" 2>/dev/null; then
-            echo "✓ Successfully downloaded from URL1"
-        else
-            echo "✗ URL1 not found, trying previous day..."
-            # 尝试前一天
-            PREV_DATE=$(date -u -d 'yesterday' '+%Y%m%d')
-            URL1="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${PREV_DATE}.txt"
-            if curl -s --fail "$URL1" > "tmp/file1.txt" 2>/dev/null; then
-                echo "✓ Successfully downloaded previous day from URL1"
-            else
-                echo "✗ Previous day also not found for URL1"
-                echo "File not available from URL1" > "tmp/file1.txt"
-            fi
-        fi
-        
-        # 下载第二个文件（如果存在）
-        if curl -s --fail "$URL2" > "tmp/file2.txt" 2>/dev/null; then
-            echo "✓ Successfully downloaded from URL2"
-        else
-            echo "✗ URL2 not found, trying previous day..."
-            # 尝试前一天
-            PREV_DATE=$(date -u -d 'yesterday' '+%Y%m%d')
-            URL2="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${PREV_DATE}.txt"
-            if curl -s --fail "$URL2" > "tmp/file2.txt" 2>/dev/null; then
-                echo "✓ Successfully downloaded previous day from URL2"
-            else
-                echo "✗ Previous day also not found for URL2"
-                echo "File not available from URL2" > "tmp/file2.txt"
-            fi
-        fi
-        
-        # 合并文件到 twlk.txt
-        echo "==========================================" > twlk.txt
-        echo "File 1 from: https://node.freeclashnode.com" >> twlk.txt
-        echo "Date: $(date)" >> twlk.txt
-        echo "==========================================" >> twlk.txt
-        cat tmp/file1.txt >> twlk.txt
+        # 创建 twlk.txt
+        echo "# TWLK File - Updated: $DATE" > twlk.txt
         echo "" >> twlk.txt
-        echo "" >> twlk.txt
+        echo "This file is automatically updated daily at 23:00 Beijing time." >> twlk.txt
         
-        echo "==========================================" >> twlk.txt
-        echo "File 2 from: https://v2rayshare.githubrowcontent.com" >> twlk.txt
-        echo "Date: $(date)" >> twlk.txt
-        echo "==========================================" >> twlk.txt
-        cat tmp/file2.txt >> twlk.txt
-        
-        # 显示合并后的文件行数
-        LINES=$(wc -l < twlk.txt)
-        echo "Total lines in twlk.txt: $LINES"
-        
-    - name: Commit and push if changed
+    - name: Commit and Push
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        
-        #if git diff --quiet twlk.txt; then
-          #echo "No changes to commit"
-        #else
-          git add twlk.txt
-          git commit -m "Update twlk.txt with latest content - $(date -u '+%Y-%m-%d %H:%M:%S') UTC"
-          git push origin main
-          echo "Changes committed and pushed"
-        #fi
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add twlk.txt
+        git commit -m "Update twlk.txt - $(date '+%Y-%m-%d')" || exit 0
+        git push
