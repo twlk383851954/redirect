@@ -1,0 +1,109 @@
+name: Update TWLK File Daily
+
+on:
+  schedule:
+    # 每天 UTC 时间 15:00 运行 (北京时间 23:00)
+    - cron: '0 15 * * *'
+  workflow_dispatch: # 允许手动触发
+  push:
+    branches:
+      - main
+
+jobs:
+  update-twlk:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+        
+    - name: Generate URLs and fetch content
+      run: |
+        # 获取当前日期
+        CURRENT_DATE=$(date -u '+%Y%m%d')
+        CURRENT_YEAR=$(date -u '+%Y')
+        CURRENT_MONTH=$(date -u '+%m')
+        
+        # 构建第一个URL
+        URL1="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${CURRENT_DATE}.txt"
+        
+        # 构建第二个URL
+        URL2="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
+        
+        echo "Fetching from: $URL1"
+        echo "Fetching from: $URL2"
+        
+        # 创建临时目录
+        mkdir -p tmp
+        
+        # 下载第一个文件（如果存在）
+        if curl -s --fail "$URL1" > "tmp/file1.txt" 2>/dev/null; then
+            echo "✓ Successfully downloaded from URL1"
+        else
+            echo "✗ URL1 not found, trying previous day..."
+            # 尝试前一天
+            PREV_DATE=$(date -u -d 'yesterday' '+%Y%m%d')
+            URL1="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${PREV_DATE}.txt"
+            if curl -s --fail "$URL1" > "tmp/file1.txt" 2>/dev/null; then
+                echo "✓ Successfully downloaded previous day from URL1"
+            else
+                echo "✗ Previous day also not found for URL1"
+                echo "File not available from URL1" > "tmp/file1.txt"
+            fi
+        fi
+        
+        # 下载第二个文件（如果存在）
+        if curl -s --fail "$URL2" > "tmp/file2.txt" 2>/dev/null; then
+            echo "✓ Successfully downloaded from URL2"
+        else
+            echo "✗ URL2 not found, trying previous day..."
+            # 尝试前一天
+            PREV_DATE=$(date -u -d 'yesterday' '+%Y%m%d')
+            URL2="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${PREV_DATE}.txt"
+            if curl -s --fail "$URL2" > "tmp/file2.txt" 2>/dev/null; then
+                echo "✓ Successfully downloaded previous day from URL2"
+            else
+                echo "✗ Previous day also not found for URL2"
+                echo "File not available from URL2" > "tmp/file2.txt"
+            fi
+        fi
+        
+        # 合并文件到 twlk.txt
+        echo "==========================================" > twlk.txt
+        echo "File 1 from: https://node.freeclashnode.com" >> twlk.txt
+        echo "Date: $(date)" >> twlk.txt
+        echo "==========================================" >> twlk.txt
+        cat tmp/file1.txt >> twlk.txt
+        echo "" >> twlk.txt
+        echo "" >> twlk.txt
+        
+        echo "==========================================" >> twlk.txt
+        echo "File 2 from: https://v2rayshare.githubrowcontent.com" >> twlk.txt
+        echo "Date: $(date)" >> twlk.txt
+        echo "==========================================" >> twlk.txt
+        cat tmp/file2.txt >> twlk.txt
+        
+        # 显示合并后的文件行数
+        LINES=$(wc -l < twlk.txt)
+        echo "Total lines in twlk.txt: $LINES"
+        
+    - name: Commit and push if changed
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        if git diff --quiet twlk.txt; then
+          echo "No changes to commit"
+        else
+          git add twlk.txt
+          git commit -m "Update twlk.txt with latest content - $(date -u '+%Y-%m-%d %H:%M:%S') UTC"
+          git push origin main
+          echo "Changes committed and pushed"
+        fi
