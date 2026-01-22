@@ -83,8 +83,8 @@ jobs:
         
         # 合并文件到 twlk.txt
         cat tmp/file1.txt > twlk.txt
-        # cat tmp/file2.txt >> twlk.txt
-        cat tmp/file3.txt >> twlk.txt
+        cat tmp/file2.txt >> twlk.txt
+        # cat tmp/file3.txt >> twlk.txt
         
     - name: Commit and push if changed
       run: |
