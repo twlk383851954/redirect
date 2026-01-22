@@ -50,6 +50,8 @@ jobs:
                 echo "✗ Previous day also not found for URL1"
             fi
         fi
+        cat tmp/file1.txt > twlk.txt
+        echo "" >> twlk.txt
         
         # 下载第二个文件（如果存在）
         if curl -s --fail "$URL2" > "tmp/file2.txt" 2>/dev/null; then
@@ -65,7 +67,8 @@ jobs:
                 echo "✗ Previous day also not found for URL2"
             fi
         fi
-
+        cat tmp/file2.txt >> twlk.txt
+        echo "" >> twlk.txt
         # 下载第3个文件（如果存在）
         if curl -s --fail "$URL3" > "tmp/file3.txt" 2>/dev/null; then
             echo "✓ Successfully downloaded from URL3"
@@ -80,11 +83,8 @@ jobs:
                 echo "✗ Previous day also not found for URL3"
             fi
         fi
-        
-        # 合并文件到 twlk.txt
-        cat tmp/file1.txt > twlk.txt
-        cat tmp/file2.txt >> twlk.txt
-        # cat tmp/file3.txt >> twlk.txt
+        cat tmp/file3.txt >> twlk.txt
+        echo "" >> twlk.txt
         
     - name: Commit and push if changed
       run: |
