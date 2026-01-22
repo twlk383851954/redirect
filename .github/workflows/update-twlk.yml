@@ -53,7 +53,6 @@ jobs:
                 echo "✓ Successfully downloaded previous day from URL1"
             else
                 echo "✗ Previous day also not found for URL1"
-                echo "File not available from URL1" > "tmp/file1.txt"
             fi
         fi
         
@@ -69,7 +68,6 @@ jobs:
                 echo "✓ Successfully downloaded previous day from URL2"
             else
                 echo "✗ Previous day also not found for URL2"
-                echo "File not available from URL2" > "tmp/file2.txt"
             fi
         fi
         
