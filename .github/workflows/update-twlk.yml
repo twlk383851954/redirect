@@ -1,12 +1,12 @@
 name: Update TWLK File Daily
 
-on:
+于:
   schedule:
     # 每天 UTC 时间 15:00 运行 (北京时间 23:00)
     - cron: '0 15 * * *'
   workflow_dispatch: # 允许手动触发
   push:
-    branches:
+    分支:
       - main
 
 jobs:
@@ -99,11 +99,11 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        if git diff --quiet twlk.txt; then
-          echo "No changes to commit"
-        else
+        #if git diff --quiet twlk.txt; then
+          #echo "No changes to commit"
+        #else
           git add twlk.txt
           git commit -m "Update twlk.txt with latest content - $(date -u '+%Y-%m-%d %H:%M:%S') UTC"
           git push origin main
           echo "Changes committed and pushed"
-        fi
+        #fi
