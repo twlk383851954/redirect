@@ -74,23 +74,8 @@ jobs:
         fi
         
         # 合并文件到 twlk.txt
-        echo "==========================================" > twlk.txt
-        echo "File 1 from: https://node.freeclashnode.com" >> twlk.txt
-        echo "Date: $(date)" >> twlk.txt
-        echo "==========================================" >> twlk.txt
-        cat tmp/file1.txt >> twlk.txt
-        echo "" >> twlk.txt
-        echo "" >> twlk.txt
-        
-        echo "==========================================" >> twlk.txt
-        echo "File 2 from: https://v2rayshare.githubrowcontent.com" >> twlk.txt
-        echo "Date: $(date)" >> twlk.txt
-        echo "==========================================" >> twlk.txt
+        cat tmp/file1.txt > twlk.txt
         cat tmp/file2.txt >> twlk.txt
-        
-        # 显示合并后的文件行数
-        LINES=$(wc -l < twlk.txt)
-        echo "Total lines in twlk.txt: $LINES"
         
     - name: Commit and push if changed
       run: |
