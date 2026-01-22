@@ -29,14 +29,9 @@ jobs:
         CURRENT_YEAR=$(date -u '+%Y')
         CURRENT_MONTH=$(date -u '+%m')
         
-        # 构建第一个URL
         URL1="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${CURRENT_DATE}.txt"
-        
-        # 构建第二个URL
         URL2="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
-        
-        echo "Fetching from: $URL1"
-        echo "Fetching from: $URL2"
+        URL3="https://v2clash.blog/Link/${CURRENT_DATE}-v2ray.txt"
         
         # 创建临时目录
         mkdir -p tmp
@@ -70,10 +65,26 @@ jobs:
                 echo "✗ Previous day also not found for URL2"
             fi
         fi
+
+        # 下载第3个文件（如果存在）
+        if curl -s --fail "$URL3" > "tmp/file3.txt" 2>/dev/null; then
+            echo "✓ Successfully downloaded from URL3"
+        else
+            echo "✗ URL3 not found, trying previous day..."
+            # 尝试前一天
+            PREV_DATE=$(date -u -d 'yesterday' '+%Y%m%d')
+            URL3="https://v2clash.blog/Link/${PREV_DATE}-v2ray.txt"
+            if curl -s --fail "$URL3" > "tmp/file3.txt" 2>/dev/null; then
+                echo "✓ Successfully downloaded previous day from URL3"
+            else
+                echo "✗ Previous day also not found for URL3"
+            fi
+        fi
         
         # 合并文件到 twlk.txt
         cat tmp/file1.txt > twlk.txt
         cat tmp/file2.txt >> twlk.txt
+        cat tmp/file3.txt >> twlk.txt
         
     - name: Commit and push if changed
       run: |
