@@ -60,6 +60,8 @@ jobs:
         process_source "https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${CURRENT_DATE}.txt"
         process_source "https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
         process_source "https://v2clash.blog/Link/${CURRENT_DATE}-v2ray.txt"
+        process_source "https://clashgithub.com/wp-content/uploads/rss/${CURRENT_DATE}.txt"
+        process_source "https://oss.oneclash.cc/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
         
     - name: Commit and push if changed
       run: |
