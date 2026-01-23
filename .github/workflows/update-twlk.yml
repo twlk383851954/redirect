@@ -50,7 +50,7 @@ jobs:
              echo "$FINAL_CONTENT" >> twlk.txt
              echo "" >> twlk.txt
           else
-            echo "fail"
+            echo "fail-$URL"
           fi
          }
         # 获取当前日期
