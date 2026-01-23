@@ -60,7 +60,7 @@ jobs:
              echo "$FINAL_CONTENT" >> twlk.txt
              echo "" >> twlk.txt
           fi
-          done
+        done
         
     - name: Commit and push if changed
       run: |
