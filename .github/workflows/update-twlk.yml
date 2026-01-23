@@ -21,20 +21,9 @@ jobs:
         
     - name: Generate URLs and fetch content
       run: |
-        # 获取当前日期
-        CURRENT_DATE=$(date -u '+%Y%m%d')
-        CURRENT_YEAR=$(date -u '+%Y')
-        CURRENT_MONTH=$(date -u '+%m')
-        # 定义 URL 数组
-        declare -A URLS=(
-          ["URL1"]="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${CURRENT_DATE}.txt"
-          ["URL2"]="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
-          ["URL3"]="https://v2clash.blog/Link/${CURRENT_DATE}-v2ray.txt"         
-        )
-        
-        echo "" > twlk.txt
-        for SOURCE_NAME in "${!URLS[@]}"; do
-          URL="${URLS[$SOURCE_NAME]}"       
+        # 定义URL处理函数
+        process_source() {
+          URL="$1"       
           CONTENT=$(curl -s -f "$URL" 2>/dev/null || echo "DOWNLOAD_FAILED")       
           if [ "$CONTENT" != "DOWNLOAD_FAILED" ] && [ -n "$CONTENT" ]; then
             echo "✓ 下载成功 ($(echo "$CONTENT" | wc -c) 字节)"
@@ -52,15 +41,24 @@ jobs:
                   FINAL_CONTENT="$CONTENT"
                   STATUS="(原始内容)"
                fi        
-             else
+            else
                echo "✓ 不是 Base64 编码，使用原始内容"
                FINAL_CONTENT="$CONTENT"
                STATUS="(原始内容)"
-             fi
+            fi
              echo "$FINAL_CONTENT" >> twlk.txt
              echo "" >> twlk.txt
           fi
-        done
+         }
+        # 获取当前日期
+        CURRENT_DATE=$(date -u '+%Y%m%d')
+        CURRENT_YEAR=$(date -u '+%Y')
+        CURRENT_MONTH=$(date -u '+%m')
+        echo "" > twlk.txt
+        #调用函数，依次获取
+        process_source "https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${CURRENT_DATE}.txt"
+        process_source "https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
+        process_source "https://v2clash.blog/Link/${CURRENT_DATE}-v2ray.txt"
         
     - name: Commit and push if changed
       run: |
