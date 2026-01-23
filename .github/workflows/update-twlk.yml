@@ -12,15 +12,12 @@ on:
 jobs:
   update-twlk:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: write
+      
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
-        
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
         
     - name: Generate URLs and fetch content
       run: |
@@ -28,66 +25,42 @@ jobs:
         CURRENT_DATE=$(date -u '+%Y%m%d')
         CURRENT_YEAR=$(date -u '+%Y')
         CURRENT_MONTH=$(date -u '+%m')
+        # 定义 URL 数组
+        declare -A URLS=(
+          ["URL1"]="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${CURRENT_DATE}.txt"
+          ["URL2"]="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
+          ["URL3"]="https://v2clash.blog/Link/${CURRENT_DATE}-v2ray.txt"         
+        )
         
-        URL1="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${CURRENT_DATE}.txt"
-        URL2="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${CURRENT_DATE}.txt"
-        URL3="https://v2clash.blog/Link/${CURRENT_DATE}-v2ray.txt"
-        
-        # 创建临时目录
-        mkdir -p tmp
-        
-        # 下载第一个文件（如果存在）
-        if curl -s --fail "$URL1" > "tmp/file1.txt" 2>/dev/null; then
-            echo "✓ Successfully downloaded from URL1"
-        else
-            echo "✗ URL1 not found, trying previous day..."
-            # 尝试前一天
-            PREV_DATE=$(date -u -d 'yesterday' '+%Y%m%d')
-            URL1="https://node.freeclashnode.com/uploads/${CURRENT_YEAR}/${CURRENT_MONTH}/0-${PREV_DATE}.txt"
-            if curl -s --fail "$URL1" > "tmp/file1.txt" 2>/dev/null; then
-                echo "✓ Successfully downloaded previous day from URL1"
-            else
-                echo "✗ Previous day also not found for URL1"
-            fi
-        fi
-        base64 -d tmp/file1.txt > twlk.txt
-        #cat tmp/file1.txt > twlk.txt
-        echo "" >> twlk.txt
-        
-        # 下载第二个文件（如果存在）
-        if curl -s --fail "$URL2" > "tmp/file2.txt" 2>/dev/null; then
-            echo "✓ Successfully downloaded from URL2"
-        else
-            echo "✗ URL2 not found, trying previous day..."
-            # 尝试前一天
-            PREV_DATE=$(date -u -d 'yesterday' '+%Y%m%d')
-            URL2="https://v2rayshare.githubrowcontent.com/${CURRENT_YEAR}/${CURRENT_MONTH}/${PREV_DATE}.txt"
-            if curl -s --fail "$URL2" > "tmp/file2.txt" 2>/dev/null; then
-                echo "✓ Successfully downloaded previous day from URL2"
-            else
-                echo "✗ Previous day also not found for URL2"
-            fi
-        fi
-        base64 -d tmp/file2.txt >> twlk.txt
-        #cat tmp/file2.txt >> twlk.txt
-        echo "" >> twlk.txt
-        # 下载第3个文件（如果存在）
-        if curl -s --fail "$URL3" > "tmp/file3.txt" 2>/dev/null; then
-            echo "✓ Successfully downloaded from URL3"
-        else
-            echo "✗ URL3 not found, trying previous day..."
-            # 尝试前一天
-            PREV_DATE=$(date -u -d 'yesterday' '+%Y%m%d')
-            URL3="https://v2clash.blog/Link/${PREV_DATE}-v2ray.txt"
-            if curl -s --fail "$URL3" > "tmp/file3.txt" 2>/dev/null; then
-                echo "✓ Successfully downloaded previous day from URL3"
-            else
-                echo "✗ Previous day also not found for URL3"
-            fi
-        fi
-        base64 -d tmp/file3.txt >> twlk.txt
-        #cat tmp/file3.txt >> twlk.txt
-        echo "" >> twlk.txt
+        echo "" > twlk.txt
+        for SOURCE_NAME in "${!URLS[@]}"; do
+          URL="${URLS[$SOURCE_NAME]}"       
+          CONTENT=$(curl -s -f "$URL" 2>/dev/null || echo "DOWNLOAD_FAILED")       
+          if [ "$CONTENT" != "DOWNLOAD_FAILED" ] && [ -n "$CONTENT" ]; then
+            echo "✓ 下载成功 ($(echo "$CONTENT" | wc -c) 字节)"
+            # 检查是否是 Base64 编码
+            if echo "$CONTENT" | grep -q "^[A-Za-z0-9+/]*=*$" 2>/dev/null; then
+               echo "✓ 检测到 Base64 编码，进行解码..."       
+               # 尝试 Base64 解码
+               DECODED_CONTENT=$(echo "$CONTENT" | base64 -d 2>/dev/null || echo "$CONTENT")       
+               if [ "$DECODED_CONTENT" != "$CONTENT" ]; then
+                  echo "✓ Base64 解码成功 ($(echo "$DECODED_CONTENT" | wc -c) 字节)"
+                  FINAL_CONTENT="$DECODED_CONTENT"
+                  STATUS="(Base64解码后)"
+               else
+                  echo "✗ Base64 解码失败，使用原始内容"
+                  FINAL_CONTENT="$CONTENT"
+                  STATUS="(原始内容)"
+               fi        
+             else
+               echo "✓ 不是 Base64 编码，使用原始内容"
+               FINAL_CONTENT="$CONTENT"
+               STATUS="(原始内容)"
+             fi
+             echo "$FINAL_CONTENT" >> twlk.txt
+             echo "" >> twlk.txt
+          fi
+          done
         
     - name: Commit and push if changed
       run: |
