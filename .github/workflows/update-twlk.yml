@@ -23,7 +23,8 @@ jobs:
       run: |
         # 定义URL处理函数
         process_source() {
-          URL="$1"       
+          URL="$1"
+          CONTENT=""
           CONTENT=$(curl -s -f "$URL" 2>/dev/null || echo "DOWNLOAD_FAILED")       
           if [ "$CONTENT" != "DOWNLOAD_FAILED" ] && [ -n "$CONTENT" ]; then
             echo "✓ 下载成功 ($(echo "$CONTENT" | wc -c) 字节)"
