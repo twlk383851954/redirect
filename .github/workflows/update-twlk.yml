@@ -23,9 +23,7 @@ jobs:
       run: |
         # 定义URL处理函数
         process_source() {
-          URL="$1"
-          CONTENT=""
-          CONTENT=$(curl -s -f "$URL" 2>/dev/null || echo "DOWNLOAD_FAILED")       
+          CONTENT=$(curl -s -f "$1" 2>/dev/null || echo "DOWNLOAD_FAILED")       
           if [ "$CONTENT" != "DOWNLOAD_FAILED" ] && [ -n "$CONTENT" ]; then
             echo "✓ 下载成功 ($(echo "$CONTENT" | wc -c) 字节)"
             # 检查是否是 Base64 编码
@@ -50,7 +48,7 @@ jobs:
              echo "$FINAL_CONTENT" >> twlk.txt
              echo "" >> twlk.txt
           else
-            echo "fail-$URL"
+            echo "✗ 下载失败: $1"
           fi
          }
         # 获取当前日期
