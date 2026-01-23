@@ -48,6 +48,8 @@ jobs:
             fi
              echo "$FINAL_CONTENT" >> twlk.txt
              echo "" >> twlk.txt
+          else
+            echo "fail"
           fi
          }
         # 获取当前日期
