@@ -25,7 +25,7 @@ jobs:
         process_source() {
           CONTENT=$(curl -s -f "$1" 2>/dev/null || echo "DOWNLOAD_FAILED")       
           if [ "$CONTENT" != "DOWNLOAD_FAILED" ] && [ -n "$CONTENT" ]; then
-            echo "✓ 下载成功 ($(echo "$CONTENT" | wc -c) 字节)"
+            echo "✓ 下载成功:$1 ($(echo "$CONTENT" | wc -c) 字节)"
             # 检查是否是 Base64 编码
             if echo "$CONTENT" | grep -q "^[A-Za-z0-9+/]*=*$" 2>/dev/null; then
                echo "✓ 检测到 Base64 编码，进行解码..."       
