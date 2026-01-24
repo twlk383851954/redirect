@@ -3,7 +3,8 @@ name: Update TWLK File Daily
 on:
   schedule:
     # 每天 UTC 时间 15:00 运行 (北京时间 23:00)
-    - cron: '0 15 * * *'
+    #- cron: '0 15 * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:
