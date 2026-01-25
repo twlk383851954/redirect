@@ -2,7 +2,7 @@ name: Schedule Heartbeat (Daily Test)
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '*/60 * * * *'
   workflow_dispatch:
 
 jobs:
