@@ -2,20 +2,16 @@ name: Schedule(Daily)
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 jobs:
-  heartbeat:
+  Schedule:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      
+    
     steps:
       - name: prepare
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Generate URLs and fetch content
         run: |
@@ -63,13 +59,14 @@ jobs:
           
       - name: Commit and push if changed
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          if git diff --quiet twlk.txt; then
-            echo "No changes to commit"
+          if [ $(wc -l < twlk.txt) -gt 3 ]; then
+            if git diff --quiet twlk.txt 2>/dev/null; then
+              echo "No changes to commit"
+            else
+              git add twlk.txt
+              git commit -m "Update twlk.txt - $(date '+%Y-%m-%d %H:%M UTC')"
+              git push origin HEAD:main
+            fi
           else
-            git add twlk.txt
-            git commit -m "Update twlk.txt - $(date '+%Y-%m-%d')" || exit 0
-            git push --force-with-lease origin HEAD:main
+            echo "文件内容为空或过少，跳过提交以避免覆盖有效数据。"
           fi
