@@ -1,4 +1,4 @@
-name: Schedule Heartbeat (Daily Test)
+name: Schedule(Daily)
 
 on:
   schedule:
