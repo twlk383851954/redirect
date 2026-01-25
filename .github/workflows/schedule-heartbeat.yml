@@ -1,0 +1,23 @@
+name: Schedule Heartbeat (Daily Test)
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record timestamp
+        run: |
+          echo "✅ 定时心跳正常" >> heartbeat.log
+          echo "UTC: $(date -u '+%Y-%m-%d %H:%M:%S')" >> heartbeat.log
+          echo "CST: $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')" >> heartbeat.log
+          echo "---" >> heartbeat.log
+          
+      - name: Upload log as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: heartbeat-logs
+          path: heartbeat.log
