@@ -2,7 +2,7 @@ name: Schedule Heartbeat (Daily Test)
 
 on:
   schedule:
-    - cron: '*/60 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
           echo "---" >> heartbeat.log
           
       - name: Upload log as artifact
-        uses: actions/upload-artifact@v4
+        uses: EndBug/add-and-commit@v9
         with:
-          name: heartbeat-logs
-          path: heartbeat.log
+          add: 'heartbeat.log'  # 指定要添加的文件
+          message: 'heartbeat.log'
