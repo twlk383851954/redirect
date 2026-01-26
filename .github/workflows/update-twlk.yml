@@ -25,10 +25,10 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
         run: |
-          echo $date >> update.log
+          echo $(date '+%Y-%m-%d %H:%M:%S UTC') >> update.log
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add twlk.txt
-          git commit -m "Update twlk.txt - $(date '+%Y-%m-%d %H:%M UTC')"
+          git add update.log
+          git commit -m "Update update.log - $(date '+%Y-%m-%d %H:%M UTC')"
           git push origin HEAD:main
           
