@@ -63,6 +63,8 @@ jobs:
           
       - name: Commit and push if changed
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           if [ $(wc -l < twlk.txt) -gt 3 ]; then
             if git diff --quiet twlk.txt 2>/dev/null; then
               echo "No changes to commit"
